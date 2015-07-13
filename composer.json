@@ -1,0 +1,26 @@
+{
+    "name": "matthewbaggett/drill-sargent",
+    "authors": [
+        {
+            "name": "Matthew Baggett",
+            "email": "matthew@baggett.me"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "jenkins-khan/jenkins-api": "dev-master",
+        "thru.io/active_record": "dev-master",
+        "raveren/kint": "^1.0@dev"
+    },
+    "repositories": [
+        {
+            "url": "https://github.com/matthewbaggett/jenkins-php-api",
+            "type": "git"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "DrillSargent\\": "src"
+        }
+    }
+}
