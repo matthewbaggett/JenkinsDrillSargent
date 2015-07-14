@@ -24,5 +24,8 @@
         "psr-4": {
             "DrillSargent\\": "src"
         }
-    }
+    },
+    "bin": [
+        "drill-sargent"
+    ]
 }
