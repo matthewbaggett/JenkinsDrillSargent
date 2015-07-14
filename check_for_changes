@@ -3,50 +3,5 @@
 
 require_once("bootstrap.php");
 
-use DrillSargent\Models;
-
-// TODO: Use UDP discovery to find the host.
-
-$jenkinsHost = "http://jenkins.frontline-solutions.co.uk:8080";
-
-$jenkins = new \JenkinsKhan\Jenkins($jenkinsHost);
-
-foreach($jenkins->getAllJobs() as $jobName){
-    $jobName = $jobName['name'];
-    echo "Getting Job \"{$jobName}\"\n";
-    $job = $jenkins->getJob($jobName);
-    $jobModel = Models\Job::CreateOrFind($jobName);
-    echo " > Colour is: {$job->getColor()}\n";
-    $builds = $job->getBuilds();
-    $builds = array_reverse($builds);
-    if(count($builds) > 0){
-        foreach ($builds as $build) {
-
-            /** @var \JenkinsKhan\Jenkins\Build $build */
-            $build = $build->getJenkins()->getBuild($job->getNameURLSafe(), $build->getNumber(), null);
-            #\Kint::dump($build);exit;
-            if($build->isRunning()){
-                echo " > Skipping running build.\n";
-                continue;
-            }
-            $buildModel = Models\Build::search()
-              ->where('jenkins_build_id', $build->getNumber())
-              ->where('job_id', $jobModel->job_id)
-              ->execOne();
-            if ($buildModel instanceof Models\Build) {
-            } else {
-                $buildModel = new Models\Build();
-                $buildModel->jenkins_build_id = $build->getNumber();
-                $buildModel->job_id = $jobModel->job_id;
-                $buildModel->save();
-                echo " > New Build: {$build->getNumber()} was a {$build->getResult()} and took {$build->getDuration()} seconds\n";
-                if($build->getDescription()) {
-                    echo " > Comment:  {$build->getDescription()}\n";
-                }
-                echo " > Branch:   {$build->getGitBranch()}\n";
-                echo " > Revision: {$build->getGitRevision()}\n";
-                echo "\n";
-            }
-        }
-    }
-}
+$ds = new \DrillSargent\DrillSargent();
+$ds->run();
