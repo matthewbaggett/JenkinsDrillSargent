@@ -132,10 +132,10 @@ class DrillSargent
                                     echo "  > STATUS CHANGED FROM {$previousBuildModel->status} => {$buildModel->status}\n";
                                     if($gitRepository){
                                         echo "  > It was authored by {$gitCommit->getAuthorName()} ({$gitCommit->getAuthorEmail()})\n";
-                                        $authorDate = new Carbon($gitCommit->getAuthorDate());
+                                        $authorDate = Carbon::instance($gitCommit->getAuthorDate());
                                         echo "  > at {$authorDate->format("Y-m-d H:i:s")}, {$authorDate->diffForHumans()}\n";
                                         echo "  > It was committed by {$gitCommit->getCommitterName()} ({$gitCommit->getCommitterEmail()})\n";
-                                        $committerDate = new Carbon($gitCommit->getCommitterDate());
+                                        $committerDate = Carbon::instance($gitCommit->getCommitterDate());
                                         echo "  > at {$committerDate->format("Y-m-d H:i:s")}, {$committerDate->diffForHumans()}\n";
                                         echo "  > \"" . trim($gitCommit->getMessage()) . "\"\n";
 
