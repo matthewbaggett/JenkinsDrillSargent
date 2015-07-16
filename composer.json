@@ -12,7 +12,8 @@
         "thru.io/active_record": "dev-master",
         "raveren/kint": "^1.0@dev",
         "gitonomy/gitlib": "^1.0@dev",
-        "swiftmailer/swiftmailer": "^6.0@dev"
+        "swiftmailer/swiftmailer": "^6.0@dev",
+        "nesbot/carbon": "dev-master"
     },
     "repositories": [
         {

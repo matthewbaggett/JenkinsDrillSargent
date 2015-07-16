@@ -25,9 +25,9 @@ class Build extends ActiveRecord
     public $job_id;
     public $name = "";
     public $status;
-    public $comment;
-    public $git_branch;
-    public $git_revision;
+    public $comment = '';
+    public $git_branch = '';
+    public $git_revision = '';
 
     public function getPrevious(){
         $jenkins_build_id = $this->jenkins_build_id - 1;

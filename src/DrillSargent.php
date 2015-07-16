@@ -1,6 +1,7 @@
 <?php
 namespace DrillSargent;
 
+use Carbon\Carbon;
 use DrillSargent\Models\Build;
 use DrillSargent\Models\Job;
 use Gitonomy\Git\Commit;
@@ -74,9 +75,14 @@ class DrillSargent
                         $build = $build->getJenkins()->getBuild($job->getNameURLSafe(), $build->getNumber(), null);
 
                         if (!file_exists($gitRepoPath)) {
-                            echo " > Cloning Repo to $gitRepoPath";
-                            $gitRepository = \Gitonomy\Git\Admin::cloneTo($gitRepoPath, $build->getGitRemoteURL());
-                            echo " ... Done!\n";
+                            if($build->getGitRemoteURL()) {
+                                echo " > Cloning Repo to $gitRepoPath";
+                                $gitRepository = \Gitonomy\Git\Admin::cloneTo($gitRepoPath, $build->getGitRemoteURL());
+                                echo " ... Done!\n";
+                            }else{
+                                echo " > Skipping cloning, no git repo specified.\n";
+                                $gitRepository = null;
+                            }
                         } else {
                             $gitRepository = new Repository($gitRepoPath);
                         }
@@ -97,8 +103,8 @@ class DrillSargent
                             $buildModel->job_id = $jobModel->job_id;
                             $buildModel->status = $build->getResult();
                             $buildModel->comment = $build->getDescription() ? $build->getDescription() : "";
-                            $buildModel->git_branch = $build->getGitBranch();
-                            $buildModel->git_revision = $build->getGitRevision();
+                            $buildModel->git_branch = $build->getGitBranch() ? $build->getGitBranch() : "";
+                            $buildModel->git_revision = $build->getGitRevision() ? $build->getGitRevision() : "";
 
                             $previousBuildModel = $buildModel->getPrevious();
 
@@ -109,7 +115,9 @@ class DrillSargent
                             }
                             echo " > Branch:   {$build->getGitBranch()}\n";
                             echo " > Revision: {$build->getGitRevision()}\n";
-                            $gitCommit = $gitRepository->getCommit($build->getGitRevision());
+                            if($gitRepository) {
+                                $gitCommit = $gitRepository->getCommit($build->getGitRevision());
+                            }
 
                             if ($previousBuildModel instanceof Models\Build) {
                                 if ($previousBuildModel->status != $buildModel->status) {
@@ -122,17 +130,21 @@ class DrillSargent
                                     }
 
                                     echo "  > STATUS CHANGED FROM {$previousBuildModel->status} => {$buildModel->status}\n";
-                                    echo "  > It was authored by {$gitCommit->getAuthorName()} ({$gitCommit->getAuthorEmail()})\n";
-                                    echo "  > at {$gitCommit->getAuthorDate()->format("Y-m-d H:i:s")}\n";
-                                    echo "  > It was committed by {$gitCommit->getCommitterName()} ({$gitCommit->getCommitterEmail()})\n";
-                                    echo "  > at {$gitCommit->getCommitterDate()->format("Y-m-d H:i:s")}\n";
-                                    echo "  > \"" . trim($gitCommit->getMessage()) . "\"\n";
+                                    if($gitRepository){
+                                        echo "  > It was authored by {$gitCommit->getAuthorName()} ({$gitCommit->getAuthorEmail()})\n";
+                                        $authorDate = new Carbon($gitCommit->getAuthorDate());
+                                        echo "  > at {$authorDate->format("Y-m-d H:i:s")}, {$authorDate->diffForHumans()}\n";
+                                        echo "  > It was committed by {$gitCommit->getCommitterName()} ({$gitCommit->getCommitterEmail()})\n";
+                                        $committerDate = new Carbon($gitCommit->getCommitterDate());
+                                        echo "  > at {$committerDate->format("Y-m-d H:i:s")}, {$committerDate->diffForHumans()}\n";
+                                        echo "  > \"" . trim($gitCommit->getMessage()) . "\"\n";
 
-                                    if ($gitCommit->getCommitterDate()->getTimestamp() >= time() - $maxWaterUnderBridge) {
-                                        echo "  > Send an email!\n";
-                                        $this->stateChanged($jobModel, $buildModel, $gitCommit, $improvedOrWorsen);
-                                    } else {
-                                        echo "  > Too long ago to send an email.\n";
+                                        if ($committerDate->getTimestamp() >= time() - $maxWaterUnderBridge) {
+                                            echo "  > Send an email!\n";
+                                            $this->stateChanged($jobModel, $buildModel, $gitCommit, $improvedOrWorsen);
+                                        } else {
+                                            echo "  > Too long ago to send an email.\n";
+                                        }
                                     }
                                 } else {
                                     echo "  > STATUS NOT CHANGED: {$buildModel->status}\n";
