@@ -54,7 +54,7 @@ class DrillSargent
 
     public function run()
     {
-        $maxWaterUnderBridge = 60*15;
+        $maxWaterUnderBridge = 60*60;
 
         $jenkinses = $this->detectJenkinsInstalls();
         foreach($jenkinses as $jenkins){
