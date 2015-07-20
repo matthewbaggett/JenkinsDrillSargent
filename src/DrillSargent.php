@@ -139,11 +139,13 @@ class DrillSargent
                                         echo "  > at {$committerDate->format("Y-m-d H:i:s")}, {$committerDate->diffForHumans()}\n";
                                         echo "  > \"" . trim($gitCommit->getMessage()) . "\"\n";
 
-                                        if ($committerDate->getTimestamp() >= time() - $maxWaterUnderBridge) {
+                                        $buildDate = Carbon::createFromTimestamp($build->getTimestamp());
+
+                                        if ($buildDate->getTimestamp() >= time() - $maxWaterUnderBridge) {
                                             echo "  > Send an email!\n";
                                             $this->stateChanged($jobModel, $buildModel, $gitCommit, $improvedOrWorsen);
                                         } else {
-                                            echo "  > Too long ago to send an email.\n";
+                                            echo "  > Too long ago to send an email ({$buildDate->diffForHumans()}).\n";
                                         }
                                     }
                                 } else {
