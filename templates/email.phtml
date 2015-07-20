@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>PureText Newsletter</title>
+    <title><?php echo $title; ?></title>
     <style type="text/CSS">
         /*The .ExternalClass is used for Hotmail and ensures your email will take up the entire width of its viewing pane.*/
         .ExternalClass {
@@ -81,7 +81,7 @@
         <td valign="top" style="padding-top: 25px; padding-right: 20px;padding-bottom: 25px;padding-left: 20px">
             <p
               style="font-size: 20px; font-family: Tahoma,Geneva,sans-serif; line-height: 26px; margin: 0px; padding: 0px; color: #444444;">
-                <?php echo $intro_copy; ?>
+                <?php echo nl2br($intro_copy); ?>
             </p>
         </td>
     </tr>
@@ -91,7 +91,6 @@
 <!-- Start of main container -->
 <table width="600" border="0" cellspacing="0" cellpadding="0" align="center">
     <tr>
-        =09
         <!-- Start of Main Column -->
         <td width="600" valign="top">
             <table width="400" border="0" cellspacing="0" cellpadding="0" align="left">
@@ -99,12 +98,10 @@
                     <td width="360" valign="top"
                         style="padding-top: 0; padding-right: 20px;padding-bottom: 20px;padding-left: 20px">
                         <h2 style="font-size: 18px; font-family: Tahoma,Geneva,sans-serif; font-weight: lighter; margin: 0px; padding-bottom: 3px; color: #444444 !important;text-align: left;">
-                            Commit Log
+                            <?php echo $commit_log_title; ?>
                         </h2>
 
-                        <p style="font-size: 11px; font-family: Verdana, Arial, Helvetica, sans-serif; line-height: 15px; margin: 0px; padding: 0px;color: #444444;text-align: left;">
-                            <?php echo $body; ?>
-                        </p>
+                        <pre style="font-size: 8px;"><?php echo htmlentities($commit_log); ?></pre>
                     </td>
                 </tr>
             </table>
@@ -131,7 +128,7 @@
                                     </h2>
 
                                     <p style="font-size: 10px; font-family: Verdana, Arial, Helvetica, sans-serif; line-height: 15px; margin: 0px; padding: 0px; color: #444444;text-align: left;">
-                                        You were sent this email because your email address (<?php echo $email_to; ?>) are listed as committers for this build.
+                                        You were sent this email because your email address (<?php echo htmlentities($email_to); ?>) are listed as committers for this build.
                                     </p>
                                 </td>
                             </tr>

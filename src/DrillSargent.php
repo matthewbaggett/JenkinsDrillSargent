@@ -4,7 +4,9 @@ namespace DrillSargent;
 use Carbon\Carbon;
 use DrillSargent\Models\Build;
 use DrillSargent\Models\Job;
+use Gitonomy\Git\Blame\Line;
 use Gitonomy\Git\Commit;
+use Gitonomy\Git\Diff\FileChange;
 use Gitonomy\Git\Repository;
 
 class DrillSargent
@@ -54,7 +56,7 @@ class DrillSargent
 
     public function run()
     {
-        $maxWaterUnderBridge = 60*60;
+        $maxWaterUnderBridge = 60*60*60;
         $fetchedRepos = [];
 
         $jenkinses = $this->detectJenkinsInstalls();
@@ -180,10 +182,63 @@ class DrillSargent
             $intro_copy = "Hello, {$commit->getAuthorName()}\n\n Project {$job->name} has {$improvedOrWorsened} to {$build->status}\n";
         }
 
+        $intro_copy .= "Commit {$commit->getShortHash()} was made by {$commit->getCommitterName()} ({$commit->getCommitterEmail()}. The message was:\n";
+        $intro_copy .= "\"{$commit->getMessage()}\"\n";
+
         $email_to = "{$commit->getAuthorName()} <{$email}>";
 
+        $previousSuccessfulBuild = $build->getPreviousSuccessfulBuild();
+        if($previousSuccessfulBuild instanceof Build){
+            $previousSuccessfulCommit = $commit->getRepository()->getCommit($previousSuccessfulBuild->git_revision);
+            $between = "{$previousSuccessfulCommit->getHash()}..{$commit->getHash()}";
+            $prettyBetween = $previousSuccessfulCommit->getShortHash() . ".." . $commit->getShortHash();
+            $previouslySuccessfulCommitTime = Carbon::instance($previousSuccessfulCommit->getCommitterDate());
+            $commitTime = Carbon::instance($commit->getCommitterDate());
+            $timeBetween = $previouslySuccessfulCommitTime->diffForHumans($commitTime);
+            $commit_log_title = "Commit Log (between {$prettyBetween}, {$timeBetween})";
+            $diff = $commit->getRepository()->getDiff($between);
+            $commit_log = count($diff->getFiles()) . " files were modified.\n";
+            if(count($diff->getFiles()) > 0){
+                foreach($diff->getFiles() as $file){
+                    if($file->isRename()){
+                        $commit_log .= "RENAME: {{$file->getOldName()}} => {{$file->getNewName()}}\n";
+                    }
+                    if($file->isCreation()){
+                        $commit_log .= "CREATED: {{$file->getName()}}\n";
+                    }
+                    if($file->isDelete()){
+                        $commit_log .= "DELETED: {{$file->getName()}}\n";
+                    }
+                    if($file->isChangeMode()){
+                        $commit_log .= "CHANGE MODE: {{$file->getName()}} {$file->getOldMode()} => {$file->getNewMode()}\n";
+                    }
+                    if($file->isModification()){
+                        $commit_log .= "MODIFIED: {{$file->getName()}}\n";
+                        $changes = $file->getChanges();
+                        foreach ($changes as $change) {
+                            foreach ($change->getLines() as $data) {
+                                list ($type, $line) = $data;
+                                if ($type === FileChange::LINE_CONTEXT) {
+                                    $commit_log .=  ' >   '.$line."\n";
+                                } elseif ($type === FileChange::LINE_ADD) {
+                                    $commit_log .=  ' > + '.$line."\n";
+                                } else {
+                                    $commit_log .=  ' > - '.$line."\n";
+                                }
+                            }
+                        }
+                    }
+                    $commit_log .= "\n";
+                }
+            }
+        }else{
+            $commit_log_title = "Commit Log Unavailable";
+            $commit_log = "";
+        }
+
+
         ob_start();
-        require("../templates/email.phtml");
+        require(__DIR__ . "/../templates/email.phtml");
         $message = ob_get_contents();
         ob_end_clean();
 
@@ -196,13 +251,15 @@ class DrillSargent
     }
 
     private function sendMail($to, $subject, $message){
-        echo "TO: {$to}\n";
-        echo "SUBJECT: {$subject}\n";
-        echo "MESSAGE:\n{$message}\n";
+        echo "   > To: {$to}\n";
+        echo "   > Subject: {$subject}\n";
+        //echo "   > Message:\n{$message}\n";
 
         $headers  = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
         $headers .= 'Bcc: matthew+frontline@baggett.me' . "\r\n";
+
+        #file_put_contents(__DIR__ . "/../tmp/email-" . date("Ymd_His") . ".html", $message); die("stop.\n");
 
         mail($to, $subject, $message, $headers);
     }

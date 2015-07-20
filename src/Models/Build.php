@@ -43,4 +43,12 @@ class Build extends ActiveRecord
           ->execOne();
     }
 
+    public function getPreviousSuccessfulBuild(){
+        return Build::search()
+            ->where('job_id', $this->job_id)
+            ->where('build_id', $this->build_id, '<')
+            ->where('status', 'SUCCESS')
+            ->execOne();
+    }
+
 }
