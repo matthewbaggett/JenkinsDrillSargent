@@ -55,6 +55,7 @@ class DrillSargent
     public function run()
     {
         $maxWaterUnderBridge = 60*60;
+        $fetchedRepos = [];
 
         $jenkinses = $this->detectJenkinsInstalls();
         foreach($jenkinses as $jenkins){
@@ -85,9 +86,14 @@ class DrillSargent
                             }
                         } else {
                             $gitRepository = new Repository($gitRepoPath);
+                            if(!isset($fetchedRepos[$gitRepoPath])) {
+                                echo " > Repo exists, running fetch...";
+                                $gitRepository->run('fetch', array('--all'));
+                                echo " [DONE]\n";
+                                $fetchedRepos[$gitRepoPath] = true;
+                            }
                         }
 
-                        #\Kint::dump($build);exit;
                         if ($build->isRunning()) {
                             echo " > Skipping running build.\n";
                             continue;
@@ -113,9 +119,10 @@ class DrillSargent
                             if ($build->getDescription()) {
                                 echo " > Comment:  {$build->getDescription()}\n";
                             }
-                            echo " > Branch:   {$build->getGitBranch()}\n";
-                            echo " > Revision: {$build->getGitRevision()}\n";
                             if($gitRepository) {
+                                echo " > Repo:     {$build->getGitRemoteURL()}\n";
+                                echo " > Branch:   {$build->getGitBranch()}\n";
+                                echo " > Revision: {$build->getGitRevision()}\n";
                                 $gitCommit = $gitRepository->getCommit($build->getGitRevision());
                             }
 
