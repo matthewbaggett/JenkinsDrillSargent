@@ -129,11 +129,11 @@ class DrillSargent
                             if ($previousBuildModel instanceof Models\Build) {
                                 if ($previousBuildModel->status != $buildModel->status) {
                                     if ($previousBuildModel->status == "FAILURE" && $buildModel->status == "SUCCESS") {
-                                        $improvedOrWorsen = "Improved";
+                                        $improvedOrWorsened = "Improved";
                                     } elseif ($previousBuildModel->status == "SUCCESS" && $buildModel->status == "FAILURE") {
-                                        $improvedOrWorsen = "Worsen";
+                                        $improvedOrWorsened = "Worseneded";
                                     } else {
-                                        $improvedOrWorsen = "Unknown";
+                                        $improvedOrWorsened = "Unknown";
                                     }
 
                                     echo "  > STATUS CHANGED FROM {$previousBuildModel->status} => {$buildModel->status}\n";
@@ -150,7 +150,7 @@ class DrillSargent
 
                                         if ($buildDate->getTimestamp() >= time() - $maxWaterUnderBridge) {
                                             echo "  > Send an email!\n";
-                                            $this->stateChanged($jobModel, $buildModel, $gitCommit, $improvedOrWorsen);
+                                            $this->stateChanged($jobModel, $buildModel, $gitCommit, $improvedOrWorsened);
                                         } else {
                                             echo "  > Too long ago to send an email ({$buildDate->diffForHumans()}).\n";
                                         }
@@ -168,18 +168,18 @@ class DrillSargent
         }
     }
 
-    private function stateChanged(Job $job, Build $build, Commit $commit, $improvedOrWorsen){
+    private function stateChanged(Job $job, Build $build, Commit $commit, $improvedOrWorsened){
         $email = $commit->getAuthorEmail();
         $email = "matthew@baggett.me";
 
-        if($improvedOrWorsen == 'Unknown'){
+        if($improvedOrWorsened == 'Unknown'){
             $message = "Hello, {$commit->getAuthorName()}\n\n Project {$job->name} has gone from 'unknown' state to {$build->status}\n";
         }else{
-            $message = "Hello, {$commit->getAuthorName()}\n\n Project {$job->name} has {$improvedOrWorsen} to {$build->status}\n";
+            $message = "Hello, {$commit->getAuthorName()}\n\n Project {$job->name} has {$improvedOrWorsened} to {$build->status}\n";
         }
         $this->sendMail(
           "{$commit->getAuthorName()} <{$email}>",
-          "{$job->name} has {$improvedOrWorsen}",
+          "{$job->name} has {$improvedOrWorsened}",
           $message
         );
 
