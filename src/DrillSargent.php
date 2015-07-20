@@ -172,14 +172,24 @@ class DrillSargent
         $email = $commit->getAuthorEmail();
         $email = "matthew@baggett.me";
 
+        $title = "{$job->name} has {$improvedOrWorsened}";
+        $generated_time_statement = date("Y-m-d H:i:s");
         if($improvedOrWorsened == 'Unknown'){
-            $message = "Hello, {$commit->getAuthorName()}\n\n Project {$job->name} has gone from 'unknown' state to {$build->status}\n";
+            $intro_copy = "Hello, {$commit->getAuthorName()}\n\n Project {$job->name} has gone from 'unknown' state to {$build->status}\n";
         }else{
-            $message = "Hello, {$commit->getAuthorName()}\n\n Project {$job->name} has {$improvedOrWorsened} to {$build->status}\n";
+            $intro_copy = "Hello, {$commit->getAuthorName()}\n\n Project {$job->name} has {$improvedOrWorsened} to {$build->status}\n";
         }
+
+        $email_to = "{$commit->getAuthorName()} <{$email}>";
+
+        ob_start();
+        require("../templates/email.phtml");
+        $message = ob_get_contents();
+        ob_end_clean();
+
         $this->sendMail(
-          "{$commit->getAuthorName()} <{$email}>",
-          "{$job->name} has {$improvedOrWorsened}",
+          $email_to,
+          $title,
           $message
         );
 
