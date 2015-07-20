@@ -181,9 +181,8 @@ class DrillSargent
         }else{
             $intro_copy = "Hello, {$commit->getAuthorName()}\n\n Project {$job->name} has {$improvedOrWorsened} to {$build->status}\n";
         }
-
-        $intro_copy .= "Commit {$commit->getShortHash()} was made by {$commit->getCommitterName()} ({$commit->getCommitterEmail()}. The message was:\n";
-        $intro_copy .= "\"{$commit->getMessage()}\"\n";
+        $commitMessage = trim($commit->getMessage());
+        $intro_copy .= "Commit {$commit->getShortHash()} was made by {$commit->getCommitterName()} ({$commit->getCommitterEmail()}. The message was:\n\"{$commitMessage}\"\n";
 
         $email_to = "{$commit->getAuthorName()} <{$email}>";
 
