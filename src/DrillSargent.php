@@ -133,7 +133,7 @@ class DrillSargent
                                     if ($previousBuildModel->status == "FAILURE" && $buildModel->status == "SUCCESS") {
                                         $improvedOrWorsened = "Improved";
                                     } elseif ($previousBuildModel->status == "SUCCESS" && $buildModel->status == "FAILURE") {
-                                        $improvedOrWorsened = "Worseneded";
+                                        $improvedOrWorsened = "Worsened";
                                     } else {
                                         $improvedOrWorsened = "Unknown";
                                     }
