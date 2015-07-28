@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "bc3de0ee8f59a80269ec903fb51db1ac",
+    "hash": "5a1df7ee1a374201aec9c27a402f61f9",
     "packages": [
         {
             "name": "doctrine/lexer",
@@ -464,17 +464,67 @@
             "time": "2015-07-10 04:29:01"
         },
         {
+            "name": "symfony/yaml",
+            "version": "v2.6.6",
+            "target-dir": "Symfony/Component/Yaml",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/Yaml.git",
+                "reference": "174f009ed36379a801109955fc5a71a49fe62dd4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/174f009ed36379a801109955fc5a71a49fe62dd4",
+                "reference": "174f009ed36379a801109955fc5a71a49fe62dd4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3"
+            },
+            "require-dev": {
+                "symfony/phpunit-bridge": "~2.7"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.6-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Symfony\\Component\\Yaml\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Symfony Community",
+                    "homepage": "http://symfony.com/contributors"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                }
+            ],
+            "description": "Symfony Yaml Component",
+            "homepage": "http://symfony.com",
+            "time": "2015-03-30 15:54:10"
+        },
+        {
             "name": "thru.io/active_record",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Thruio/ActiveRecord.git",
-                "reference": "0dd7143a1945b0848083aa0c273261b12c285da8"
+                "reference": "24cb76833fe3a6de798eef0d6410f2b43803f8ac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Thruio/ActiveRecord/zipball/0dd7143a1945b0848083aa0c273261b12c285da8",
-                "reference": "0dd7143a1945b0848083aa0c273261b12c285da8",
+                "url": "https://api.github.com/repos/Thruio/ActiveRecord/zipball/24cb76833fe3a6de798eef0d6410f2b43803f8ac",
+                "reference": "24cb76833fe3a6de798eef0d6410f2b43803f8ac",
                 "shasum": ""
             },
             "require": {
@@ -514,7 +564,7 @@
                 }
             ],
             "description": "An active-record like implementation",
-            "time": "2015-07-10 16:40:55"
+            "time": "2015-07-22 14:52:02"
         },
         {
             "name": "thru.io/json-pretty-printer",
