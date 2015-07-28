@@ -103,7 +103,8 @@ class DrillSargent
                 echo " > Connecting {$jenkinsInstallUrl}\n";
                 try {
                     $jenkinsInstall = new \JenkinsKhan\Jenkins($jenkinsInstallUrl);
-                    \Kint::dump($jenkinsInstall->getComputers());
+                    // Call something from the API to trigger an error...
+                    $jenkinsInstall->getComputers();
                     $jenkinsPrescribed[] = $jenkinsInstall;
                 }catch(\RuntimeException $e){
                     if($e->getMessage() == 'Error during json_decode'){
