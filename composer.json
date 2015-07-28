@@ -13,6 +13,7 @@
         "raveren/kint": "^1.0@dev",
         "gitonomy/gitlib": "^1.0@dev",
         "swiftmailer/swiftmailer": "^6.0@dev",
+        "symfony/yaml": "2.6.6",
         "nesbot/carbon": "dev-master"
     },
     "repositories": [
