@@ -2,3 +2,4 @@
 vendor
 *.sqlite
 *.sqlite-journal
+drill.yml

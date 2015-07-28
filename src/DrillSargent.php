@@ -8,9 +8,12 @@ use Gitonomy\Git\Blame\Line;
 use Gitonomy\Git\Commit;
 use Gitonomy\Git\Diff\FileChange;
 use Gitonomy\Git\Repository;
+use Symfony\Component\Yaml\Yaml;
 
 class DrillSargent
 {
+
+    private $configuration;
 
     public function __construct(){
         define('SCRIPT_ROOT', $_SERVER['PWD']);
@@ -54,12 +57,75 @@ class DrillSargent
 
     }
 
+    private function loadConfig(){
+        $configLocation = APP_ROOT . "/drill.yml";
+
+        $defaultConfiguration = [
+            'detectJenkins' => 'yes',
+            'jenkinsInstalls' => [
+              'http://localhost',
+            ],
+            'ignoreProjects' => [
+                'DrillSargent'
+            ],
+            'maxTimeToComplain' => 60*60*60
+        ];
+
+        if(!file_exists($configLocation)){
+            if(!is_writable(dirname($configLocation))){
+                die("Can't write to {$configLocation}, not writable!\n");
+            }
+            file_put_contents($configLocation, Yaml::dump($defaultConfiguration));
+        }
+
+        $this->configuration = Yaml::parse(file_get_contents($configLocation));
+    }
+
+    private function getConfig($key){
+        if(isset($this->configuration[$key])) {
+            return $this->configuration[$key];
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * @return \JenkinsKhan\Jenkins[]
+     */
+    private function fetchJenkinsConnections(){
+        $jenkinsDetected = [];
+        $jenkinsPrescribed = [];
+        if($this->getConfig("detectJenkins") == "yes"){
+            $jenkinsDetected = $this->detectJenkinsInstalls();
+        }
+        if($this->getConfig("jenkinsInstalls")){
+            foreach($this->getConfig('jenkinsInstalls') as $jenkinsInstallUrl){
+                echo " > Connecting {$jenkinsInstallUrl}\n";
+                try {
+                    $jenkinsInstall = new \JenkinsKhan\Jenkins($jenkinsInstallUrl);
+                    \Kint::dump($jenkinsInstall->getComputers());
+                    $jenkinsPrescribed[] = $jenkinsInstall;
+                }catch(\RuntimeException $e){
+                    if($e->getMessage() == 'Error during json_decode'){
+                        // This is OK.
+                        echo "  > Cannot connect to {$jenkinsInstallUrl}\n";
+                    }
+                }
+            }
+        }
+
+        $jenkinses = array_merge($jenkinsPrescribed, $jenkinsDetected);
+        return $jenkinses;
+    }
+
     public function run()
     {
-        $maxWaterUnderBridge = 60*60*60;
+        $this->loadConfig();
+
         $fetchedRepos = [];
 
-        $jenkinses = $this->detectJenkinsInstalls();
+        $jenkinses = $this->fetchJenkinsConnections();
+
         foreach($jenkinses as $jenkins){
             foreach ($jenkins->getAllJobs() as $jobName) {
                 $jobName = $jobName['name'];
@@ -150,7 +216,7 @@ class DrillSargent
 
                                         $buildDate = Carbon::createFromTimestamp($build->getTimestamp());
 
-                                        if ($buildDate->getTimestamp() >= time() - $maxWaterUnderBridge) {
+                                        if ($buildDate->getTimestamp() >= time() - $this->getConfig("maxTimeToComplain")) {
                                             echo "  > Send an email!\n";
                                             $this->stateChanged($jobModel, $buildModel, $gitCommit, $improvedOrWorsened);
                                         } else {
